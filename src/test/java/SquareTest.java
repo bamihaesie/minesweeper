@@ -1,26 +1,37 @@
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class SquareTest {
 
+    private Square square;
+
+    @Before
+    public void setUp() throws Exception {
+        square = new Square(false);
+    }
+
     @Test
     public void testCreateSquare() {
-        Square square = new Square();
         assertEquals(SquareState.COVERED, square.getState());
     }
 
     @Test
     public void testSetState() {
-        Square square = new Square();
         square.setState(SquareState.COVERED_AND_FLAGGED);
         assertEquals(SquareState.COVERED_AND_FLAGGED, square.getState());
     }
 
     @Test
-    public void testUncoverSquare() {
-        Square square = new Square();
+    public void testUncoverSquare() throws ExplosionException {
         square.uncover();
         assertEquals(SquareState.UNCOVERED, square.getState());
+    }
+
+    @Test (expected = ExplosionException.class)
+    public void testUncoverSquareWithMine() throws ExplosionException {
+        square = new Square(true);
+        square.uncover();
     }
 }

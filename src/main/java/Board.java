@@ -1,52 +1,189 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class Board {
 
     private int width;
     private int height;
     private int numberOfMines;
     private Square[][] matrix;
+    private int flagCount;
+    private int uncoveredCount;
 
     public Board(int width, int height, int numberOfMines) {
         this.width = width;
         this.height = height;
         this.numberOfMines = numberOfMines;
+        if (numberOfMines > width * height) {
+            throw new ExceptionInInitializerError();
+        }
         regenerateBoard();
     }
 
     private void regenerateBoard() {
+        uncoveredCount = 0;
         this.matrix = new Square[width][height];
+        placeEmptySquares();
+        placeMines();
+    }
+
+    private void placeMines() {
+        for (int i = 0; i < numberOfMines; i++) {
+            Point position = placeRandomMine();
+            while (position == null) {
+                position = placeRandomMine();
+            }
+            updateNeighbours(position);
+        }
+    }
+
+    private void updateNeighbours(Point position) {
+        for (Square neighbour : getNeighbours(position)) {
+            neighbour.incrementNearbyMines();
+        }
+    }
+
+    protected List<Square> getNeighbours(Point position) {
+        List<Square> neighbours = new ArrayList<Square>();
+        int[] xSkew = new int[] {0, 1, 1, 1, 0, -1, -1, -1};
+        int[] ySkew = new int[] {1, 1, 0, -1, -1, -1, 0, 1};
+        for (int i = 0; i < xSkew.length; i++) {
+            Point neighbour = new Point(position.getX() + xSkew[i], position.getY() + ySkew[i]);
+            if (isValidPosition(neighbour)) {
+                neighbours.add(matrix[neighbour.getX()][neighbour.getY()]);
+            }
+        }
+        return neighbours;
+    }
+
+    private Point placeRandomMine() {
+        Random random = new Random();
+        int randomX = random.nextInt(width);
+        int randomY = random.nextInt(height);
+        if (!matrix[randomX][randomY].hasMine()) {
+            matrix[randomX][randomY].setMine(true);
+            return new Point(randomX, randomY);
+        }
+        return null;
+    }
+
+    private void placeEmptySquares() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                matrix[i][j] = new Square();
+                matrix[i][j] = new Square(false);
             }
         }
     }
 
     public int getCoveredCount() {
-        int covered = 0;
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                if (matrix[i][j].getState() == SquareState.COVERED
-                        || matrix[i][j].getState() == SquareState.COVERED_AND_FLAGGED) {
-                    covered++;
-                }
-            }
-        }
-        return covered;
+        return width * height - uncoveredCount;
     }
 
     public int getUncoveredCount() {
-        int uncovered = 0;
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                if (matrix[i][j].getState() == SquareState.UNCOVERED) {
-                    uncovered++;
-                }
-            }
-        }
-        return uncovered;
+        return uncoveredCount;
     }
 
     public int getNumberOfMines() {
         return numberOfMines;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public void uncover(Point position) throws ExplosionException, GameOverException {
+        if (isValidPosition(position) && isCovered(position)) {
+            matrix[position.getX()][position.getY()].uncover();
+            uncoveredCount++;
+            if (getCoveredCount() == numberOfMines) {
+                throw new GameOverException();
+            }
+        }
+    }
+
+    public void uncoverAllMines() {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (matrix[i][j].hasMine()) {
+                    matrix[i][j].setState(SquareState.UNCOVERED);
+                }
+            }
+        }
+    }
+
+    private boolean isCovered(Point position) {
+        SquareState state = matrix[position.getX()][position.getY()].getState();
+        return state == SquareState.COVERED || state == SquareState.COVERED_AND_FLAGGED;
+    }
+
+    private boolean isValidPosition(Point position) {
+        return position.getX() >= 0 && position.getX() < width
+                && position.getY() >= 0 && position.getY() < height;
+    }
+
+    public int getFlagCount() {
+        return flagCount;
+    }
+
+    public void flag(Point position) {
+        if (isValidPosition(position)) {
+            if (!isFlagged(position) && isFlagable(position)) {
+                flagCount++;
+                matrix[position.getX()][position.getY()].setState(SquareState.COVERED_AND_FLAGGED);
+            }
+        }
+    }
+
+    public void unflag(Point position) {
+        if (isValidPosition(position)) {
+            if (isFlagged(position)) {
+                flagCount--;
+                matrix[position.getX()][position.getY()].setState(SquareState.COVERED);
+            }
+        }
+    }
+
+    private boolean isFlagged(Point position) {
+        return matrix[position.getX()][position.getY()].getState() == SquareState.COVERED_AND_FLAGGED;
+    }
+
+    private boolean isFlagable(Point position) {
+        return matrix[position.getX()][position.getY()].getState() != SquareState.UNCOVERED;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                switch (matrix[i][j].getState()) {
+                    case UNCOVERED:
+                        if (matrix[i][j].hasMine()) {
+                            if (matrix[i][j].isExploded()) {
+                                sb.append("[$] ");
+                            } else {
+                                sb.append("[*] ");
+                            }
+                        } else {
+                            sb.append("[" + matrix[i][j].getNearbyMines() + "] ");
+                        }
+                        break;
+                    case COVERED:
+                        sb.append("[ ] ");
+                        break;
+                    case COVERED_AND_FLAGGED:
+                        sb.append("[p] ");
+                        break;
+                }
+            }
+            sb.append("\n");
+        }
+
+        return sb.toString();
     }
 }

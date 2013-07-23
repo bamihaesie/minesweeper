@@ -1,9 +1,14 @@
 public class Square {
 
     private SquareState state;
+    private boolean mine;
+    private int nearbyMines;
+    private boolean exploded;
 
-    public Square() {
+    public Square(boolean mine) {
+        this.mine = mine;
         state = SquareState.COVERED;
+        nearbyMines = 0;
     }
 
     public SquareState getState() {
@@ -14,7 +19,31 @@ public class Square {
         this.state = state;
     }
 
-    public void uncover() {
+    public boolean hasMine() {
+        return mine;
+    }
+
+    public void setMine(boolean mine) {
+        this.mine = mine;
+    }
+
+    public void uncover() throws ExplosionException {
         this.state = SquareState.UNCOVERED;
+        if (hasMine()) {
+            exploded = true;
+            throw new ExplosionException();
+        }
+    }
+
+    public void incrementNearbyMines() {
+        nearbyMines++;
+    }
+
+    public int getNearbyMines() {
+        return nearbyMines;
+    }
+
+    public boolean isExploded() {
+        return exploded;
     }
 }
