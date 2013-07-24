@@ -39,19 +39,20 @@ public class Board {
     }
 
     private void updateNeighbours(Point position) {
-        for (Square neighbour : getNeighbours(position)) {
-            neighbour.incrementNearbyMines();
+        for (Point neighbour : getNeighbours(position)) {
+            Square square = matrix[neighbour.getX()][neighbour.getY()];
+            square.incrementNearbyMines();
         }
     }
 
-    protected List<Square> getNeighbours(Point position) {
-        List<Square> neighbours = new ArrayList<Square>();
+    protected List<Point> getNeighbours(Point position) {
+        List<Point> neighbours = new ArrayList<Point>();
         int[] xSkew = new int[] {0, 1, 1, 1, 0, -1, -1, -1};
         int[] ySkew = new int[] {1, 1, 0, -1, -1, -1, 0, 1};
         for (int i = 0; i < xSkew.length; i++) {
             Point neighbour = new Point(position.getX() + xSkew[i], position.getY() + ySkew[i]);
             if (isValidPosition(neighbour)) {
-                neighbours.add(matrix[neighbour.getX()][neighbour.getY()]);
+                neighbours.add(neighbour);
             }
         }
         return neighbours;
@@ -97,11 +98,25 @@ public class Board {
     }
 
     public void uncover(Point position) throws ExplosionException, GameOverException {
-        if (isValidPosition(position) && isCovered(position)) {
+        if (isValidPosition(position)) {
+            uncoverAndExpandEmptyArea(position);
+        }
+    }
+
+    private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException {
+        if (isCovered(position)) {
             matrix[position.getX()][position.getY()].uncover();
             uncoveredCount++;
             if (getCoveredCount() == numberOfMines) {
                 throw new GameOverException();
+            }
+        }
+        int nearbyMines = matrix[position.getX()][position.getY()].getNearbyMines();
+        if (nearbyMines == 0) {
+            for (Point neighbour : getNeighbours(position)) {
+                if (isCovered(neighbour)) {
+                    uncoverAndExpandEmptyArea(neighbour);
+                }
             }
         }
     }
