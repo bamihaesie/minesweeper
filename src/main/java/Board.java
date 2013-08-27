@@ -21,62 +21,6 @@ public class Board {
         regenerateBoard();
     }
 
-    private void regenerateBoard() {
-        uncoveredCount = 0;
-        this.matrix = new Square[width][height];
-        placeEmptySquares();
-        placeMines();
-    }
-
-    private void placeMines() {
-        for (int i = 0; i < numberOfMines; i++) {
-            Point position = placeRandomMine();
-            while (position == null) {
-                position = placeRandomMine();
-            }
-            updateNeighbours(position);
-        }
-    }
-
-    private void updateNeighbours(Point position) {
-        for (Point neighbour : getNeighbours(position)) {
-            Square square = matrix[neighbour.getX()][neighbour.getY()];
-            square.incrementNearbyMines();
-        }
-    }
-
-    protected List<Point> getNeighbours(Point position) {
-        List<Point> neighbours = new ArrayList<Point>();
-        int[] xSkew = new int[] {0, 1, 1, 1, 0, -1, -1, -1};
-        int[] ySkew = new int[] {1, 1, 0, -1, -1, -1, 0, 1};
-        for (int i = 0; i < xSkew.length; i++) {
-            Point neighbour = new Point(position.getX() + xSkew[i], position.getY() + ySkew[i]);
-            if (isValidPosition(neighbour)) {
-                neighbours.add(neighbour);
-            }
-        }
-        return neighbours;
-    }
-
-    private Point placeRandomMine() {
-        Random random = new Random();
-        int randomX = random.nextInt(width);
-        int randomY = random.nextInt(height);
-        if (!matrix[randomX][randomY].hasMine()) {
-            matrix[randomX][randomY].setMine(true);
-            return new Point(randomX, randomY);
-        }
-        return null;
-    }
-
-    private void placeEmptySquares() {
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                matrix[i][j] = new Square(false);
-            }
-        }
-    }
-
     public int getCoveredCount() {
         return width * height - uncoveredCount;
     }
@@ -103,24 +47,6 @@ public class Board {
         }
     }
 
-    private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException {
-        if (isCovered(position)) {
-            matrix[position.getX()][position.getY()].uncover();
-            uncoveredCount++;
-            if (getCoveredCount() == numberOfMines) {
-                throw new GameOverException();
-            }
-        }
-        int nearbyMines = matrix[position.getX()][position.getY()].getNearbyMines();
-        if (nearbyMines == 0) {
-            for (Point neighbour : getNeighbours(position)) {
-                if (isCovered(neighbour)) {
-                    uncoverAndExpandEmptyArea(neighbour);
-                }
-            }
-        }
-    }
-
     public void uncoverAllMines() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -129,16 +55,6 @@ public class Board {
                 }
             }
         }
-    }
-
-    private boolean isCovered(Point position) {
-        SquareState state = matrix[position.getX()][position.getY()].getState();
-        return state == SquareState.COVERED || state == SquareState.COVERED_AND_FLAGGED;
-    }
-
-    private boolean isValidPosition(Point position) {
-        return position.getX() >= 0 && position.getX() < width
-                && position.getY() >= 0 && position.getY() < height;
     }
 
     public int getFlagCount() {
@@ -163,6 +79,90 @@ public class Board {
         }
     }
 
+    protected List<Point> getNeighbours(Point position) {
+        List<Point> neighbours = new ArrayList<Point>();
+        int[] xSkew = new int[] {0, 1, 1, 1, 0, -1, -1, -1};
+        int[] ySkew = new int[] {1, 1, 0, -1, -1, -1, 0, 1};
+        for (int i = 0; i < xSkew.length; i++) {
+            Point neighbour = new Point(position.getX() + xSkew[i], position.getY() + ySkew[i]);
+            if (isValidPosition(neighbour)) {
+                neighbours.add(neighbour);
+            }
+        }
+        return neighbours;
+    }
+
+    private void regenerateBoard() {
+        uncoveredCount = 0;
+        this.matrix = new Square[width][height];
+        placeEmptySquares();
+        placeMines();
+    }
+
+    private void placeMines() {
+        for (int i = 0; i < numberOfMines; i++) {
+            Point position = placeRandomMine();
+            while (position == null) {
+                position = placeRandomMine();
+            }
+            updateNeighbours(position);
+        }
+    }
+
+    private void updateNeighbours(Point position) {
+        for (Point neighbour : getNeighbours(position)) {
+            Square square = matrix[neighbour.getX()][neighbour.getY()];
+            square.incrementNearbyMines();
+        }
+    }
+
+    private Point placeRandomMine() {
+        Random random = new Random();
+        int randomX = random.nextInt(width);
+        int randomY = random.nextInt(height);
+        if (!matrix[randomX][randomY].hasMine()) {
+            matrix[randomX][randomY].setMine(true);
+            return new Point(randomX, randomY);
+        }
+        return null;
+    }
+
+    private void placeEmptySquares() {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                matrix[i][j] = new Square(false);
+            }
+        }
+    }
+
+    private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException {
+        if (isCovered(position)) {
+            matrix[position.getX()][position.getY()].uncover();
+            uncoveredCount++;
+            if (getCoveredCount() == numberOfMines) {
+                throw new GameOverException();
+            }
+        }
+        int nearbyMines = matrix[position.getX()][position.getY()].getNearbyMines();
+        if (nearbyMines == 0) {
+            for (Point neighbour : getNeighbours(position)) {
+                if (isCovered(neighbour)) {
+                    uncoverAndExpandEmptyArea(neighbour);
+                }
+            }
+        }
+    }
+
+    private boolean isCovered(Point position) {
+        SquareState state = matrix[position.getX()][position.getY()].getState();
+        return state == SquareState.COVERED || state == SquareState.COVERED_AND_FLAGGED;
+    }
+
+    private boolean isValidPosition(Point position) {
+        return position.getX() >= 0 && position.getX() < width
+                && position.getY() >= 0 && position.getY() < height;
+    }
+
     private boolean isFlagged(Point position) {
         return matrix[position.getX()][position.getY()].getState() == SquareState.COVERED_AND_FLAGGED;
     }
@@ -176,25 +176,7 @@ public class Board {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
-                switch (matrix[i][j].getState()) {
-                    case UNCOVERED:
-                        if (matrix[i][j].hasMine()) {
-                            if (matrix[i][j].isExploded()) {
-                                sb.append("[$] ");
-                            } else {
-                                sb.append("[*] ");
-                            }
-                        } else {
-                            sb.append("[" + matrix[i][j].getNearbyMines() + "] ");
-                        }
-                        break;
-                    case COVERED:
-                        sb.append("[ ] ");
-                        break;
-                    case COVERED_AND_FLAGGED:
-                        sb.append("[p] ");
-                        break;
-                }
+                sb.append(matrix[i][j]).append(" ");
             }
             sb.append("\n");
         }

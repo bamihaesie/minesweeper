@@ -43,7 +43,24 @@ public class Square {
         return nearbyMines;
     }
 
-    public boolean isExploded() {
-        return exploded;
+    @Override
+    public String toString() {
+        switch ( state ) {
+            case UNCOVERED:
+                if ( mine ) {
+                    if ( exploded ) {
+                        return "[$]";
+                    } else {
+                        return "[*]";
+                    }
+                } else {
+                    return "[" + nearbyMines + "]";
+                }
+            case COVERED:
+                return "[ ]";
+            case COVERED_AND_FLAGGED:
+                return "[p]";
+        }
+        return "";
     }
 }
