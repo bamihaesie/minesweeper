@@ -1,3 +1,8 @@
+package model;
+
+import exception.ExplosionException;
+import model.Square;
+import model.SquareState;
 import org.junit.Before;
 import org.junit.Test;
 

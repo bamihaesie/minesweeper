@@ -1,3 +1,5 @@
+package model;
+
 public class Point {
 
     private final int x;
@@ -18,7 +20,7 @@ public class Point {
 
     @Override
     public String toString() {
-        return "Point{" +
+        return "model.Point{" +
                 "x=" + x +
                 ", y=" + y +
                 '}';

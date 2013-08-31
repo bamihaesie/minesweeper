@@ -1,3 +1,6 @@
+import model.Board;
+import model.Point;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

@@ -1,3 +1,11 @@
+package model;
+
+import exception.ExplosionException;
+import exception.GameOverException;
+import model.Point;
+import model.Square;
+import model.SquareState;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

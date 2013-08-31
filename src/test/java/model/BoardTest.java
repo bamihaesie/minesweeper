@@ -1,3 +1,9 @@
+package model;
+
+import exception.ExplosionException;
+import exception.GameOverException;
+import model.Board;
+import model.Point;
 import org.junit.Before;
 import org.junit.Test;
 

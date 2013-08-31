@@ -1,3 +1,7 @@
+package model;
+
+import exception.ExplosionException;
+
 public class Square {
 
     private SquareState state;
