@@ -2,16 +2,17 @@ package model;
 
 import exception.ExplosionException;
 
+import static model.SquareState.*;
+
 public class Square {
 
     private SquareState state;
     private boolean mine;
     private int nearbyMines;
-    private boolean exploded;
 
     public Square(boolean mine) {
         this.mine = mine;
-        state = SquareState.COVERED;
+        state = COVERED;
         nearbyMines = 0;
     }
 
@@ -32,9 +33,9 @@ public class Square {
     }
 
     public void uncover() throws ExplosionException {
-        this.state = SquareState.UNCOVERED;
+        this.state = UNCOVERED;
         if (hasMine()) {
-            exploded = true;
+            this.state = EXPLODED;
             throw new ExplosionException();
         }
     }
@@ -52,14 +53,12 @@ public class Square {
         switch ( state ) {
             case UNCOVERED:
                 if ( mine ) {
-                    if ( exploded ) {
-                        return "[$]";
-                    } else {
-                        return "[*]";
-                    }
+                    return "[*]";
                 } else {
                     return "[" + nearbyMines + "]";
                 }
+            case EXPLODED:
+                return "[$]";
             case COVERED:
                 return "[ ]";
             case COVERED_AND_FLAGGED:
