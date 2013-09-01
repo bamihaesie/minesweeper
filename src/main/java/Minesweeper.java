@@ -1,4 +1,3 @@
-import exception.ExplosionException;
 import model.Board;
 
 import java.io.BufferedReader;
@@ -13,7 +12,7 @@ public class Minesweeper {
         board = new Board(width, height, numberOfMines);
     }
 
-    public void click(int x, int y) throws ExplosionException {
+    public void click(int x, int y) {
         try {
             board.uncover(x, y);
             System.out.println(board);
@@ -25,12 +24,12 @@ public class Minesweeper {
         }
     }
 
-    private void flag(int x, int y) {
+    public void flag(int x, int y) {
         board.flag(x, y);
         System.out.println(board);
     }
 
-    public static void main(String[] args) throws IOException, ExplosionException {
+    public static void main(String[] args) throws IOException {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 

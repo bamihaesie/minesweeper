@@ -53,11 +53,13 @@ public class Board {
         }
     }
 
-    public void uncoverAllMines() throws ExplosionException {
+    public void uncoverAllMines() {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (matrix[i][j].hasMine()) {
-                    matrix[i][j].uncover();
+                    try {
+                        matrix[i][j].uncover();
+                    } catch (ExplosionException ignore) { }
                 }
             }
         }

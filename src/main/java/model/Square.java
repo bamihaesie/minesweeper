@@ -7,10 +7,20 @@ import static model.Square.SquareState.*;
 public class Square {
 
     enum SquareState {
-        COVERED,
-        COVERED_AND_FLAGGED,
-        UNCOVERED,
-        EXPLODED
+        COVERED             ("[ ]"),
+        COVERED_AND_FLAGGED ("[p]"),
+        UNCOVERED           ("[*]"),
+        EXPLODED            ("[$]");
+
+        private String printableSymbol;
+
+        SquareState(String printableSymbol) {
+            this.printableSymbol = printableSymbol;
+        }
+
+        public String getPrintableSymbol() {
+            return printableSymbol;
+        }
     }
 
     private SquareState state;
@@ -69,20 +79,9 @@ public class Square {
 
     @Override
     public String toString() {
-        switch ( state ) {
-            case UNCOVERED:
-                if ( mine ) {
-                    return "[*]";
-                } else {
-                    return "[" + nearbyMines + "]";
-                }
-            case EXPLODED:
-                return "[$]";
-            case COVERED:
-                return "[ ]";
-            case COVERED_AND_FLAGGED:
-                return "[p]";
+        if (UNCOVERED.equals(state) && !mine) {
+            return "[" + nearbyMines + "]";
         }
-        return "";
+        return state.getPrintableSymbol();
     }
 }
