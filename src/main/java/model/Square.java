@@ -2,9 +2,16 @@ package model;
 
 import exception.ExplosionException;
 
-import static model.SquareState.*;
+import static model.Square.SquareState.*;
 
 public class Square {
+
+    enum SquareState {
+        COVERED,
+        COVERED_AND_FLAGGED,
+        UNCOVERED,
+        EXPLODED
+    }
 
     private SquareState state;
     private boolean mine;
@@ -14,14 +21,6 @@ public class Square {
         this.mine = mine;
         state = COVERED;
         nearbyMines = 0;
-    }
-
-    public SquareState getState() {
-        return state;
-    }
-
-    public void setState(SquareState state) {
-        this.state = state;
     }
 
     public boolean hasMine() {
@@ -46,6 +45,26 @@ public class Square {
 
     public int getNearbyMines() {
         return nearbyMines;
+    }
+
+    public boolean isCovered() {
+        return state == COVERED || state == SquareState.COVERED_AND_FLAGGED;
+    }
+
+    public boolean isFlagable() {
+        return state != SquareState.UNCOVERED;
+    }
+
+    public boolean isFlagged() {
+        return state == SquareState.COVERED_AND_FLAGGED;
+    }
+
+    public void flag() {
+        state = SquareState.COVERED_AND_FLAGGED;
+    }
+
+    public void cover() {
+        state = COVERED;
     }
 
     @Override

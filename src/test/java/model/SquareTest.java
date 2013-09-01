@@ -1,12 +1,11 @@
 package model;
 
 import exception.ExplosionException;
-import model.Square;
-import model.SquareState;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class SquareTest {
 
@@ -19,19 +18,19 @@ public class SquareTest {
 
     @Test
     public void testCreateSquare() {
-        assertEquals(SquareState.COVERED, square.getState());
+        assertTrue(square.isCovered());
     }
 
     @Test
     public void testSetState() {
-        square.setState(SquareState.COVERED_AND_FLAGGED);
-        assertEquals(SquareState.COVERED_AND_FLAGGED, square.getState());
+        square.flag();
+        assertTrue(square.isFlagged());
     }
 
     @Test
     public void testUncoverSquare() throws ExplosionException {
         square.uncover();
-        assertEquals(SquareState.UNCOVERED, square.getState());
+        assertFalse(square.isCovered());
     }
 
     @Test (expected = ExplosionException.class)

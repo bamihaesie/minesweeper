@@ -1,5 +1,5 @@
+import exception.ExplosionException;
 import model.Board;
-import model.Point;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,9 +13,9 @@ public class Minesweeper {
         board = new Board(width, height, numberOfMines);
     }
 
-    public void click(Point position) {
+    public void click(int x, int y) throws ExplosionException {
         try {
-            board.uncover(position);
+            board.uncover(x, y);
             System.out.println(board);
         } catch (Exception e) {
             board.uncoverAllMines();
@@ -25,16 +25,17 @@ public class Minesweeper {
         }
     }
 
-    private void flag(Point position) {
-        board.flag(position);
+    private void flag(int x, int y) {
+        board.flag(x, y);
         System.out.println(board);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, ExplosionException {
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         System.out.println("Welcome to Minesweeper");
-        try {
+
         System.out.println("Please select board size (w/h):");
         String line = br.readLine();
         int width = Integer.parseInt(line.split("/")[0]);
@@ -59,21 +60,14 @@ public class Minesweeper {
             }
             int x = Integer.parseInt(line.split("/")[0]);
             int y = Integer.parseInt(line.split("/")[1]);
-            Point position = new Point(x, y);
 
             if (flag) {
-                minesweeper.flag(position);
+                minesweeper.flag(x, y);
             } else {
-                minesweeper.click(position);
+                minesweeper.click(x, y);
             }
         }
 
-        } catch (IOException e) {
-
-        }
-
     }
-
-
 
 }

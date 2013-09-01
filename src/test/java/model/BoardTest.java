@@ -2,8 +2,6 @@ package model;
 
 import exception.ExplosionException;
 import exception.GameOverException;
-import model.Board;
-import model.Point;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +25,7 @@ public class BoardTest {
 
     @Test
     public void testUncoverInvalidPosition() throws ExplosionException, GameOverException {
-        board.uncover(new Point(-1, 1));
+        board.uncover(-1, 1);
         assertEquals(9, board.getCoveredCount());
         assertEquals(0, board.getUncoveredCount());
     }
@@ -35,31 +33,31 @@ public class BoardTest {
     @Test
     public void testFlag() throws ExplosionException {
         assertEquals(0, board.getFlagCount());
-        board.flag(new Point(1, 1));
+        board.flag(1, 1);
         assertEquals(1, board.getFlagCount());
     }
 
     @Test
     public void testFlagTwice() throws ExplosionException {
         assertEquals(0, board.getFlagCount());
-        board.flag(new Point(1, 1));
-        board.flag(new Point(1, 1));
+        board.flag(1, 1);
+        board.flag(1, 1);
         assertEquals(1, board.getFlagCount());
     }
 
     @Test
     public void testFlagAndUnflag() throws ExplosionException {
         assertEquals(0, board.getFlagCount());
-        board.flag(new Point(1, 1));
+        board.flag(1, 1);
         assertEquals(1, board.getFlagCount());
-        board.unflag(new Point(1, 1));
+        board.unflag(1, 1);
         assertEquals(0, board.getFlagCount());
     }
 
     @Test
     public void testUnflagDoesNotWorkBeforeFlag() throws ExplosionException {
         assertEquals(0, board.getFlagCount());
-        board.unflag(new Point(1, 1));
+        board.unflag(1, 1);
         assertEquals(0, board.getFlagCount());
     }
 
@@ -88,9 +86,9 @@ public class BoardTest {
     @Test
     public void testNeighbours() {
         board = new Board(3, 3, 5);
-        assertEquals(3, board.getNeighbours(new Point(0, 0)).size());
-        assertEquals(5, board.getNeighbours(new Point(0, 1)).size());
-        assertEquals(8, board.getNeighbours(new Point(1, 1)).size());
+        assertEquals(3, board.getNeighbours(0, 0).size());
+        assertEquals(5, board.getNeighbours(0, 1).size());
+        assertEquals(8, board.getNeighbours(1, 1).size());
     }
 
     private void assertNumberOfMines(int howMany) {
@@ -98,7 +96,7 @@ public class BoardTest {
         for (int i = 0; i < board.getWidth(); i++) {
             for (int j = 0; j < board.getHeight(); j++) {
                 try {
-                    board.uncover(new Point(i, j));
+                    board.uncover(i, j);
                 } catch (ExplosionException e) {
                     found++;
                 } catch (GameOverException e) {

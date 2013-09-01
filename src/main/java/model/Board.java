@@ -2,9 +2,6 @@ package model;
 
 import exception.ExplosionException;
 import exception.GameOverException;
-import model.Point;
-import model.Square;
-import model.SquareState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,17 +46,18 @@ public class Board {
         return width;
     }
 
-    public void uncover(Point position) throws ExplosionException, GameOverException {
+    public void uncover(int x, int y) throws ExplosionException, GameOverException {
+        Point position = new Point(x, y);
         if (isValidPosition(position)) {
             uncoverAndExpandEmptyArea(position);
         }
     }
 
-    public void uncoverAllMines() {
+    public void uncoverAllMines() throws ExplosionException {
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 if (matrix[i][j].hasMine()) {
-                    matrix[i][j].setState(SquareState.UNCOVERED);
+                    matrix[i][j].uncover();
                 }
             }
         }
@@ -69,30 +67,33 @@ public class Board {
         return flagCount;
     }
 
-    public void flag(Point position) {
+    public void flag(int x, int y) {
+        Point position = new Point(x, y);
         if (isValidPosition(position)) {
             if (!isFlagged(position) && isFlagable(position)) {
                 flagCount++;
-                matrix[position.getX()][position.getY()].setState(SquareState.COVERED_AND_FLAGGED);
+                matrix[position.x][position.y].flag();
             }
         }
     }
 
-    public void unflag(Point position) {
+    public void unflag(int x, int y) {
+        Point position = new Point(x, y);
         if (isValidPosition(position)) {
             if (isFlagged(position)) {
                 flagCount--;
-                matrix[position.getX()][position.getY()].setState(SquareState.COVERED);
+                matrix[position.x][position.y].cover();
             }
         }
     }
 
-    protected List<Point> getNeighbours(Point position) {
+    protected List<Point> getNeighbours(int x, int y) {
+        Point position = new Point(x, y);
         List<Point> neighbours = new ArrayList<Point>();
         int[] xSkew = new int[] {0, 1, 1, 1, 0, -1, -1, -1};
         int[] ySkew = new int[] {1, 1, 0, -1, -1, -1, 0, 1};
         for (int i = 0; i < xSkew.length; i++) {
-            Point neighbour = new Point(position.getX() + xSkew[i], position.getY() + ySkew[i]);
+            Point neighbour = new Point(position.x + xSkew[i], position.y + ySkew[i]);
             if (isValidPosition(neighbour)) {
                 neighbours.add(neighbour);
             }
@@ -118,8 +119,8 @@ public class Board {
     }
 
     private void updateNeighbours(Point position) {
-        for (Point neighbour : getNeighbours(position)) {
-            Square square = matrix[neighbour.getX()][neighbour.getY()];
+        for (Point neighbour : getNeighbours(position.x, position.y)) {
+            Square square = matrix[neighbour.x][neighbour.y];
             square.incrementNearbyMines();
         }
     }
@@ -145,15 +146,15 @@ public class Board {
 
     private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException {
         if (isCovered(position)) {
-            matrix[position.getX()][position.getY()].uncover();
+            matrix[position.x][position.y].uncover();
             uncoveredCount++;
             if (getCoveredCount() == numberOfMines) {
                 throw new GameOverException();
             }
         }
-        int nearbyMines = matrix[position.getX()][position.getY()].getNearbyMines();
+        int nearbyMines = matrix[position.x][position.y].getNearbyMines();
         if (nearbyMines == 0) {
-            for (Point neighbour : getNeighbours(position)) {
+            for (Point neighbour : getNeighbours(position.x, position.y)) {
                 if (isCovered(neighbour)) {
                     uncoverAndExpandEmptyArea(neighbour);
                 }
@@ -162,21 +163,21 @@ public class Board {
     }
 
     private boolean isCovered(Point position) {
-        SquareState state = matrix[position.getX()][position.getY()].getState();
-        return state == SquareState.COVERED || state == SquareState.COVERED_AND_FLAGGED;
+        Square s = matrix[position.x][position.y];
+        return s.isCovered();
     }
 
     private boolean isValidPosition(Point position) {
-        return position.getX() >= 0 && position.getX() < width
-                && position.getY() >= 0 && position.getY() < height;
+        return position.x >= 0 && position.x < width
+                && position.y >= 0 && position.y < height;
     }
 
     private boolean isFlagged(Point position) {
-        return matrix[position.getX()][position.getY()].getState() == SquareState.COVERED_AND_FLAGGED;
+        return matrix[position.x][position.y].isFlagged();
     }
 
     private boolean isFlagable(Point position) {
-        return matrix[position.getX()][position.getY()].getState() != SquareState.UNCOVERED;
+        return matrix[position.x][position.y].isFlagable();
     }
 
     @Override
@@ -190,5 +191,20 @@ public class Board {
         }
 
         return sb.toString();
+    }
+
+    class Point {
+        final int x;
+        final int y;
+
+        public Point(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return "(" + x + ", " + y + ')';
+        }
     }
 }
