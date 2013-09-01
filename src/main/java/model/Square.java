@@ -37,8 +37,8 @@ public class Square {
         return mine;
     }
 
-    public void setMine(boolean mine) {
-        this.mine = mine;
+    public void setAsMine() {
+        this.mine = true;
     }
 
     public void uncover() throws ExplosionException {

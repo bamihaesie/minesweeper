@@ -132,7 +132,7 @@ public class Board {
         int randomX = random.nextInt(width);
         int randomY = random.nextInt(height);
         if (!matrix[randomX][randomY].hasMine()) {
-            matrix[randomX][randomY].setMine(true);
+            matrix[randomX][randomY].setAsMine();
             return new Point(randomX, randomY);
         }
         return null;
