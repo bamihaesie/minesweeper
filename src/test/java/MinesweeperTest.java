@@ -1,6 +1,11 @@
 import exception.ExplosionException;
+import exception.InvalidPositionException;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.awt.*;
+
+import static org.junit.Assert.assertEquals;
 
 public class MinesweeperTest {
 
@@ -31,6 +36,27 @@ public class MinesweeperTest {
     @Test (expected = ExceptionInInitializerError.class)
     public void testTooManyMines() throws ExplosionException {
         minesweeper = new Minesweeper(3, 3, 10);
+    }
+
+    @Test
+    public void testCreateBoard() {
+        assertEquals(9, minesweeper.getCoveredCount());
+    }
+
+    @Test
+    public void testFlag() throws Exception {
+        assertEquals(0, minesweeper.getFlagCount());
+        minesweeper.flag(new Point(1, 1));
+        assertEquals(1, minesweeper.getFlagCount());
+    }
+
+    @Test
+    public void testAddFlagAndRemoveFlag() throws Exception {
+        assertEquals(0, minesweeper.getFlagCount());
+        minesweeper.flag(new Point(1, 1));
+        assertEquals(1, minesweeper.getFlagCount());
+        minesweeper.flag(new Point(1, 1));
+        assertEquals(0, minesweeper.getFlagCount());
     }
 
     private void assertNumberOfMines(int howMany) {

@@ -1,5 +1,6 @@
 import exception.ExplosionException;
 import exception.GameOverException;
+import exception.InvalidPositionException;
 import model.Board;
 import model.Square;
 
@@ -10,6 +11,8 @@ public class Minesweeper {
 
     private Board board;
     private int numberOfMines;
+    private int flagCount;
+    private int uncoveredCount;
 
     public Minesweeper(int width, int height, int numberOfMines) {
         this.numberOfMines = numberOfMines;
@@ -20,32 +23,53 @@ public class Minesweeper {
         placeMines();
     }
 
-    public void click(int x, int y) throws Exception {
-        uncoverAndExpandEmptyArea(new Point(x, y));
+    public void click(Point position) throws ExplosionException, InvalidPositionException, GameOverException {
+        uncoverAndExpandEmptyArea(position);
     }
 
-    public void flag(int x, int y) {
-        board.flag(x, y);
-    }
-
-    private void placeMines() {
-        for (int i = 0; i < numberOfMines; i++) {
-            Point position = placeRandomMine();
-            while (position == null) {
-                position = placeRandomMine();
+    public void flag(Point position) throws InvalidPositionException {
+        if (board.canBeFlagged(position)) {
+            if (!board.isFlagged(position)) {
+                flagCount++;
+            } else {
+                flagCount--;
             }
-            updateNeighbours(position);
+            board.flag(position);
         }
     }
 
-    private void updateNeighbours(Point position) {
+    public int getFlagCount() {
+        return flagCount;
+    }
+
+    public int getCoveredCount() {
+        return board.getWidth() * board.getHeight() - uncoveredCount;
+    }
+
+    public void incrementUncoveredCount() {
+        uncoveredCount++;
+    }
+
+    private void placeMines() {
+        try {
+            for (int i = 0; i < numberOfMines; i++) {
+                Point position = placeRandomMine();
+                while (position == null) {
+                    position = placeRandomMine();
+                }
+                updateNeighbours(position);
+            }
+        } catch (InvalidPositionException ignore) {}
+    }
+
+    private void updateNeighbours(Point position) throws InvalidPositionException {
         for (Point neighbour : board.getNeighbours(position)) {
             Square neighbourSquare = board.getSquareAtPosition(neighbour);
             neighbourSquare.incrementNearbyMines();
         }
     }
 
-    private Point placeRandomMine() {
+    private Point placeRandomMine() throws InvalidPositionException {
         Random random = new Random();
         int randomX = random.nextInt(board.getWidth());
         int randomY = random.nextInt(board.getHeight());
@@ -57,7 +81,7 @@ public class Minesweeper {
         return null;
     }
 
-    private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException {
+    private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException, InvalidPositionException {
         if (board.isCovered(position)) {
             Square squareAtPosition = board.getSquareAtPosition(position);
             squareAtPosition.uncover();
@@ -66,8 +90,8 @@ public class Minesweeper {
                 board.uncoverAllMines();
                 throw new ExplosionException();
             }
-            board.incrementUncoveredCount();
-            if (board.getCoveredCount() == numberOfMines) {
+            incrementUncoveredCount();
+            if (getCoveredCount() == numberOfMines) {
                 throw new GameOverException();
             }
         }

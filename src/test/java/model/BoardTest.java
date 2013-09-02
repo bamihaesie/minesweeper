@@ -16,42 +16,7 @@ public class BoardTest {
         board = new Board(3, 3);
     }
 
-    @Test
-    public void testCreateBoard() {
-        assertEquals(9, board.getCoveredCount());
-        assertEquals(0, board.getUncoveredCount());
-    }
 
-    @Test
-    public void testFlag() {
-        assertEquals(0, board.getFlagCount());
-        board.flag(1, 1);
-        assertEquals(1, board.getFlagCount());
-    }
-
-    @Test
-    public void testFlagTwice() {
-        assertEquals(0, board.getFlagCount());
-        board.flag(1, 1);
-        board.flag(1, 1);
-        assertEquals(1, board.getFlagCount());
-    }
-
-    @Test
-    public void testFlagAndUnflag() {
-        assertEquals(0, board.getFlagCount());
-        board.flag(1, 1);
-        assertEquals(1, board.getFlagCount());
-        board.unflag(1, 1);
-        assertEquals(0, board.getFlagCount());
-    }
-
-    @Test
-    public void testUnflagDoesNotWorkBeforeFlag() {
-        assertEquals(0, board.getFlagCount());
-        board.unflag(1, 1);
-        assertEquals(0, board.getFlagCount());
-    }
 
     @Test
     public void testNeighbours() {

@@ -1,3 +1,6 @@
+import exception.InvalidPositionException;
+
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,12 +38,21 @@ public class ConsoleRunner {
             int x = Integer.parseInt(line.split("/")[0]);
             int y = Integer.parseInt(line.split("/")[1]);
 
+            Point position = new Point(x, y);
+
             if (flag) {
-                minesweeper.flag(x, y);
-                System.out.println(minesweeper);
+                try {
+                    minesweeper.flag(position);
+                    System.out.println(minesweeper);
+                } catch (InvalidPositionException e) {
+                    System.out.println(e.getMessage());
+                }
             } else {
                 try {
-                    minesweeper.click(x, y);
+                    minesweeper.click(position);
+                    System.out.println(minesweeper);
+                } catch (InvalidPositionException e) {
+                    System.out.println(e.getMessage());
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                     System.out.println(minesweeper);

@@ -12,8 +12,8 @@ public class Square {
 
     public Square(boolean mine) {
         this.mine = mine;
-        state = COVERED;
-        nearbyMines = 0;
+        this.state = COVERED;
+        this.nearbyMines = 0;
     }
 
     public boolean hasMine() {
@@ -33,19 +33,23 @@ public class Square {
     }
 
     public boolean isCovered() {
-        return state == COVERED || state == SquareState.COVERED_AND_FLAGGED;
+        return state == COVERED || state == SquareState.FLAGGED;
     }
 
-    public boolean isFlagable() {
+    public boolean canBeFlagged() {
         return state != SquareState.UNCOVERED;
     }
 
     public boolean isFlagged() {
-        return state == SquareState.COVERED_AND_FLAGGED;
+        return state == SquareState.FLAGGED;
     }
 
     public void flag() {
-        state = SquareState.COVERED_AND_FLAGGED;
+        if (isFlagged()) {
+            cover();
+        } else {
+            state = SquareState.FLAGGED;
+        }
     }
 
     public void cover() {
@@ -70,7 +74,7 @@ public class Square {
 
     enum SquareState {
         COVERED             ("[ ]"),
-        COVERED_AND_FLAGGED ("[p]"),
+        FLAGGED("[p]"),
         UNCOVERED           ("[*]"),
         EXPLODED            ("[$]");
 

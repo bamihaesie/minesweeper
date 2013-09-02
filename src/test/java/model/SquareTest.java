@@ -4,33 +4,52 @@ import exception.ExplosionException;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SquareTest {
 
-    private Square square;
+    private Square emptySquare;
+    private Square minedSquare;
 
     @Before
     public void setUp() throws Exception {
-        square = new Square(false);
+        emptySquare = new Square(false);
+        minedSquare = new Square(true);
     }
 
     @Test
     public void testCreateSquare() {
-        assertTrue(square.isCovered());
+        assertTrue(emptySquare.isCovered());
+        assertEquals(0, emptySquare.getNearbyMines());
+        assertFalse(emptySquare.hasMine());
+        assertTrue(minedSquare.hasMine());
     }
 
     @Test
-    public void testSetState() {
-        square.flag();
-        assertTrue(square.isFlagged());
+    public void testAddFlagRemoveFlag() {
+        assertFalse(emptySquare.isFlagged());
+        emptySquare.flag();
+        assertTrue(emptySquare.isFlagged());
+        emptySquare.flag();
+        assertFalse(emptySquare.isFlagged());
     }
 
     @Test
     public void testUncoverSquare() throws ExplosionException {
-        square.uncover();
-        assertFalse(square.isCovered());
+        assertTrue(emptySquare.isCovered());
+        emptySquare.uncover();
+        assertFalse(emptySquare.isCovered());
+    }
+
+    @Test
+    public void testNearbyMines() {
+        assertEquals(0, emptySquare.getNearbyMines());
+        emptySquare.incrementNearbyMines();
+        assertEquals(1, emptySquare.getNearbyMines());
+        emptySquare.incrementNearbyMines();
+        assertEquals(2, emptySquare.getNearbyMines());
     }
 
 }
