@@ -1,27 +1,10 @@
 package model;
 
-import exception.ExplosionException;
-
-import static model.Square.SquareState.*;
+import static model.Square.SquareState.COVERED;
+import static model.Square.SquareState.EXPLODED;
+import static model.Square.SquareState.UNCOVERED;
 
 public class Square {
-
-    enum SquareState {
-        COVERED             ("[ ]"),
-        COVERED_AND_FLAGGED ("[p]"),
-        UNCOVERED           ("[*]"),
-        EXPLODED            ("[$]");
-
-        private String printableSymbol;
-
-        SquareState(String printableSymbol) {
-            this.printableSymbol = printableSymbol;
-        }
-
-        public String getPrintableSymbol() {
-            return printableSymbol;
-        }
-    }
 
     private SquareState state;
     private boolean mine;
@@ -39,14 +22,6 @@ public class Square {
 
     public void setAsMine() {
         this.mine = true;
-    }
-
-    public void uncover() throws ExplosionException {
-        this.state = UNCOVERED;
-        if (hasMine()) {
-            this.state = EXPLODED;
-            throw new ExplosionException();
-        }
     }
 
     public void incrementNearbyMines() {
@@ -77,11 +52,36 @@ public class Square {
         state = COVERED;
     }
 
+    public void uncover() {
+        this.state = UNCOVERED;
+    }
+
+    public void explode() {
+        this.state = EXPLODED;
+    }
+
     @Override
     public String toString() {
         if (UNCOVERED.equals(state) && !mine) {
             return "[" + nearbyMines + "]";
         }
         return state.getPrintableSymbol();
+    }
+
+    enum SquareState {
+        COVERED             ("[ ]"),
+        COVERED_AND_FLAGGED ("[p]"),
+        UNCOVERED           ("[*]"),
+        EXPLODED            ("[$]");
+
+        private String printableSymbol;
+
+        SquareState(String printableSymbol) {
+            this.printableSymbol = printableSymbol;
+        }
+
+        public String getPrintableSymbol() {
+            return printableSymbol;
+        }
     }
 }

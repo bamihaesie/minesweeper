@@ -33,9 +33,4 @@ public class SquareTest {
         assertFalse(square.isCovered());
     }
 
-    @Test (expected = ExplosionException.class)
-    public void testUncoverSquareWithMine() throws ExplosionException {
-        square = new Square(true);
-        square.uncover();
-    }
 }

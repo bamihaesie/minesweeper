@@ -1,72 +1,88 @@
+import exception.ExplosionException;
+import exception.GameOverException;
 import model.Board;
+import model.Square;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.awt.*;
+import java.util.Random;
 
 public class Minesweeper {
 
     private Board board;
+    private int numberOfMines;
 
     public Minesweeper(int width, int height, int numberOfMines) {
-        board = new Board(width, height, numberOfMines);
+        this.numberOfMines = numberOfMines;
+        if (numberOfMines > width * height) {
+            throw new ExceptionInInitializerError();
+        }
+        board = new Board(width, height);
+        placeMines();
     }
 
-    public void click(int x, int y) {
-        try {
-            board.uncover(x, y);
-            System.out.println(board);
-        } catch (Exception e) {
-            board.uncoverAllMines();
-            System.out.println(e.getMessage());
-            System.out.println(board);
-            System.exit(0);
-        }
+    public void click(int x, int y) throws Exception {
+        uncoverAndExpandEmptyArea(new Point(x, y));
     }
 
     public void flag(int x, int y) {
         board.flag(x, y);
-        System.out.println(board);
     }
 
-    public static void main(String[] args) throws IOException {
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-        System.out.println("Welcome to Minesweeper");
-
-        System.out.println("Please select board size (w/h):");
-        String line = br.readLine();
-        int width = Integer.parseInt(line.split("/")[0]);
-        int height = Integer.parseInt(line.split("/")[1]);
-
-        System.out.println("Please select number of mines: ");
-        line = br.readLine();
-        int numberOfMines = Integer.parseInt(line);
-
-        Minesweeper minesweeper = new Minesweeper(width, height, numberOfMines);
-
-        while (true) {
-            System.out.println("Your move (x/y): ");
-            line = br.readLine();
-            if ("exit".equals(line)) {
-                System.exit(-1);
+    private void placeMines() {
+        for (int i = 0; i < numberOfMines; i++) {
+            Point position = placeRandomMine();
+            while (position == null) {
+                position = placeRandomMine();
             }
-            boolean flag = false;
-            if (line.startsWith("flag ")) {
-                line = line.substring(5);
-                flag = true;
-            }
-            int x = Integer.parseInt(line.split("/")[0]);
-            int y = Integer.parseInt(line.split("/")[1]);
+            updateNeighbours(position);
+        }
+    }
 
-            if (flag) {
-                minesweeper.flag(x, y);
-            } else {
-                minesweeper.click(x, y);
+    private void updateNeighbours(Point position) {
+        for (Point neighbour : board.getNeighbours(position)) {
+            Square neighbourSquare = board.getSquareAtPosition(neighbour);
+            neighbourSquare.incrementNearbyMines();
+        }
+    }
+
+    private Point placeRandomMine() {
+        Random random = new Random();
+        int randomX = random.nextInt(board.getWidth());
+        int randomY = random.nextInt(board.getHeight());
+        Square randomSquare = board.getSquareAtPosition(new Point(randomX, randomY));
+        if (!randomSquare.hasMine()) {
+            randomSquare.setAsMine();
+            return new Point(randomX, randomY);
+        }
+        return null;
+    }
+
+    private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException {
+        if (board.isCovered(position)) {
+            Square squareAtPosition = board.getSquareAtPosition(position);
+            squareAtPosition.uncover();
+            if (squareAtPosition.hasMine()) {
+                squareAtPosition.explode();
+                board.uncoverAllMines();
+                throw new ExplosionException();
+            }
+            board.incrementUncoveredCount();
+            if (board.getCoveredCount() == numberOfMines) {
+                throw new GameOverException();
             }
         }
-
+        int nearbyMines = board.getSquareAtPosition(position).getNearbyMines();
+        if (nearbyMines == 0) {
+            for (Point neighbour : board.getNeighbours(position)) {
+                if (board.isCovered(neighbour)) {
+                    uncoverAndExpandEmptyArea(neighbour);
+                }
+            }
+        }
     }
 
+    @Override
+    public String toString() {
+        return board.toString();
+    }
 }
