@@ -27,10 +27,10 @@ public class Board {
     }
 
     public Square getSquareAtPosition(Point position) throws InvalidPositionException {
-        if (isValidPosition(position)) {
-            return matrix[position.x][position.y];
+        if (!isValidPosition(position)) {
+            throw new InvalidPositionException(position);
         }
-        throw new InvalidPositionException(position);
+        return matrix[position.x][position.y];
     }
 
     public void uncoverAllMines() {

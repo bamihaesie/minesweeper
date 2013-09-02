@@ -11,8 +11,8 @@ public class Minesweeper {
 
     private Board board;
     private int numberOfMines;
-    private int flagCount;
     private int uncoveredCount;
+    private int flagCount;
 
     public Minesweeper(int width, int height, int numberOfMines) {
         this.numberOfMines = numberOfMines;
@@ -24,12 +24,15 @@ public class Minesweeper {
     }
 
     public void click(Point position) throws ExplosionException, InvalidPositionException, GameOverException {
-        uncoverAndExpandEmptyArea(position);
+        uncoverArea(position);
     }
 
     public void flag(Point position) throws InvalidPositionException {
         if (board.canBeFlagged(position)) {
             if (!board.isFlagged(position)) {
+                if (getNumberOfMinesLeft() < 1) {
+                    return;
+                }
                 flagCount++;
             } else {
                 flagCount--;
@@ -70,43 +73,68 @@ public class Minesweeper {
     }
 
     private Point placeRandomMine() throws InvalidPositionException {
-        Random random = new Random();
-        int randomX = random.nextInt(board.getWidth());
-        int randomY = random.nextInt(board.getHeight());
-        Square randomSquare = board.getSquareAtPosition(new Point(randomX, randomY));
+        Point randomPosition = generateRandomPosition();
+        Square randomSquare = board.getSquareAtPosition(randomPosition);
         if (!randomSquare.hasMine()) {
             randomSquare.setAsMine();
-            return new Point(randomX, randomY);
+            return randomPosition;
         }
         return null;
     }
 
-    private void uncoverAndExpandEmptyArea(Point position) throws ExplosionException, GameOverException, InvalidPositionException {
-        if (board.isCovered(position)) {
-            Square squareAtPosition = board.getSquareAtPosition(position);
-            squareAtPosition.uncover();
-            if (squareAtPosition.hasMine()) {
-                squareAtPosition.explode();
-                board.uncoverAllMines();
-                throw new ExplosionException();
-            }
-            incrementUncoveredCount();
-            if (getCoveredCount() == numberOfMines) {
-                throw new GameOverException();
-            }
-        }
-        int nearbyMines = board.getSquareAtPosition(position).getNearbyMines();
+    private Point generateRandomPosition() {
+        Random random = new Random();
+        int randomX = random.nextInt(board.getWidth());
+        int randomY = random.nextInt(board.getHeight());
+        return new Point(randomX, randomY);
+    }
+
+    private void uncoverArea(Point position) throws ExplosionException, GameOverException, InvalidPositionException {
+        Square currentSquare = board.getSquareAtPosition(position);
+        uncoverSquare(position, currentSquare);
+
+        int nearbyMines = currentSquare.getNearbyMines();
         if (nearbyMines == 0) {
             for (Point neighbour : board.getNeighbours(position)) {
                 if (board.isCovered(neighbour)) {
-                    uncoverAndExpandEmptyArea(neighbour);
+                    uncoverArea(neighbour);
                 }
             }
         }
     }
 
+    private void uncoverSquare(Point position, Square currentSquare) throws InvalidPositionException, ExplosionException, GameOverException {
+        if (board.isCovered(position)) {
+            currentSquare.uncover();
+            checkForExplosion(currentSquare);
+            incrementUncoveredCount();
+            checkForGameTermination();
+        }
+    }
+
+    private void checkForGameTermination() throws GameOverException {
+        if (getCoveredCount() == numberOfMines) {
+            throw new GameOverException();
+        }
+    }
+
+    private void checkForExplosion(Square currentSquare) throws ExplosionException {
+        if (currentSquare.hasMine()) {
+            currentSquare.explode();
+            board.uncoverAllMines();
+            throw new ExplosionException();
+        }
+    }
+
     @Override
     public String toString() {
-        return board.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("Mines left: " + getNumberOfMinesLeft() + "\n");
+        sb.append(board.toString());
+        return sb.toString();
+    }
+
+    private int getNumberOfMinesLeft() {
+        return numberOfMines - flagCount;
     }
 }

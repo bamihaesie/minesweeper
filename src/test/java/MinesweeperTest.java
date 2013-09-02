@@ -1,5 +1,4 @@
 import exception.ExplosionException;
-import exception.InvalidPositionException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,31 +15,9 @@ public class MinesweeperTest {
         minesweeper = new Minesweeper(3, 3, 1);
     }
 
-    @Test
-    public void testNumberOfMinesOne() throws ExplosionException {
-        assertNumberOfMines(1);
-    }
-
-    @Test
-    public void testNumberOfMinesTwo() throws ExplosionException {
-        minesweeper = new Minesweeper(3, 3, 2);
-        assertNumberOfMines(2);
-    }
-
-    @Test
-    public void testNumberOfMinesFive() throws ExplosionException {
-        minesweeper = new Minesweeper(3, 3, 5);
-        assertNumberOfMines(5);
-    }
-
     @Test (expected = ExceptionInInitializerError.class)
     public void testTooManyMines() throws ExplosionException {
         minesweeper = new Minesweeper(3, 3, 10);
-    }
-
-    @Test
-    public void testCreateBoard() {
-        assertEquals(9, minesweeper.getCoveredCount());
     }
 
     @Test
@@ -59,8 +36,13 @@ public class MinesweeperTest {
         assertEquals(0, minesweeper.getFlagCount());
     }
 
-    private void assertNumberOfMines(int howMany) {
-        // TODO
+    @Test
+    public void testCannotPutMoreFlagsThanMines() throws Exception {
+        assertEquals(0, minesweeper.getFlagCount());
+        minesweeper.flag(new Point(0, 1));
+        assertEquals(1, minesweeper.getFlagCount());
+        minesweeper.flag(new Point(1, 1));
+        assertEquals(1, minesweeper.getFlagCount());
     }
 
 }
