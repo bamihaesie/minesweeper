@@ -1,6 +1,6 @@
 package exception;
 
-import java.awt.*;
+import model.Point;
 
 public class InvalidPositionException extends Exception {
 

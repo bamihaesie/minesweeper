@@ -1,7 +1,6 @@
 package model;
 
 import static model.Square.SquareState.COVERED;
-import static model.Square.SquareState.EXPLODED;
 import static model.Square.SquareState.UNCOVERED;
 
 public class Square {
@@ -33,59 +32,15 @@ public class Square {
     }
 
     public boolean isCovered() {
-        return state == COVERED || state == SquareState.FLAGGED;
-    }
-
-    public boolean canBeFlagged() {
-        return state != SquareState.UNCOVERED;
-    }
-
-    public boolean isFlagged() {
-        return state == SquareState.FLAGGED;
-    }
-
-    public void flag() {
-        if (isFlagged()) {
-            cover();
-        } else {
-            state = SquareState.FLAGGED;
-        }
-    }
-
-    public void cover() {
-        state = COVERED;
+        return state == COVERED;
     }
 
     public void uncover() {
         this.state = UNCOVERED;
     }
 
-    public void explode() {
-        this.state = EXPLODED;
-    }
-
-    @Override
-    public String toString() {
-        if (UNCOVERED.equals(state) && !mine) {
-            return "[" + nearbyMines + "]";
-        }
-        return state.getPrintableSymbol();
-    }
-
     enum SquareState {
-        COVERED             ("[ ]"),
-        FLAGGED("[p]"),
-        UNCOVERED           ("[*]"),
-        EXPLODED            ("[$]");
-
-        private String printableSymbol;
-
-        SquareState(String printableSymbol) {
-            this.printableSymbol = printableSymbol;
-        }
-
-        public String getPrintableSymbol() {
-            return printableSymbol;
-        }
+        COVERED,
+        UNCOVERED,
     }
 }

@@ -20,20 +20,23 @@ public class SquareTest {
     }
 
     @Test
-    public void testCreateSquare() {
-        assertTrue(emptySquare.isCovered());
-        assertEquals(0, emptySquare.getNearbyMines());
+    public void testHasMine() {
         assertFalse(emptySquare.hasMine());
         assertTrue(minedSquare.hasMine());
     }
 
     @Test
-    public void testAddFlagRemoveFlag() {
-        assertFalse(emptySquare.isFlagged());
-        emptySquare.flag();
-        assertTrue(emptySquare.isFlagged());
-        emptySquare.flag();
-        assertFalse(emptySquare.isFlagged());
+    public void testSetAsMineWhenNotAMine() {
+        assertFalse(emptySquare.hasMine());
+        emptySquare.setAsMine();
+        assertTrue(emptySquare.hasMine());
+    }
+
+    @Test
+    public void testSetAsMineWhenAlreadyAMine() {
+        assertTrue(minedSquare.hasMine());
+        minedSquare.setAsMine();
+        assertTrue(minedSquare.hasMine());
     }
 
     @Test

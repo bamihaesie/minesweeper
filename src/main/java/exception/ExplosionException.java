@@ -1,6 +1,6 @@
 package exception;
 
-public class ExplosionException extends Exception {
+public class ExplosionException extends GameOverException {
 
     @Override
     public String getMessage() {

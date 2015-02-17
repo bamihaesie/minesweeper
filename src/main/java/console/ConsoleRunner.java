@@ -1,17 +1,23 @@
-import exception.InvalidPositionException;
+package console;
 
-import java.awt.*;
+import exception.ExplosionException;
+import exception.InvalidPositionException;
+import exception.NoMinesLeftToFindException;
+import model.Point;
+import service.Minesweeper;
+
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Map;
+import java.util.Set;
 
 public class ConsoleRunner {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        System.out.println("Welcome to Minesweeper");
+        System.out.println("Welcome to service.Minesweeper");
 
         System.out.println("Please select board size (w/h):");
         String line = br.readLine();
@@ -21,6 +27,8 @@ public class ConsoleRunner {
         System.out.println("Please select number of mines: ");
         line = br.readLine();
         int numberOfMines = Integer.parseInt(line);
+
+        ConsoleBoard board = new ConsoleBoard(width, height);
 
         Minesweeper minesweeper = new Minesweeper(width, height, numberOfMines);
 
@@ -42,15 +50,25 @@ public class ConsoleRunner {
 
             if (flag) {
                 try {
-                    minesweeper.flag(position);
-                    System.out.println(minesweeper);
+                    board.flag(position);
+                    System.out.println(board);
                 } catch (InvalidPositionException e) {
                     System.out.println(e.getMessage());
                 }
             } else {
                 try {
-                    minesweeper.click(position);
-                    System.out.println(minesweeper);
+                    Map<Point, Integer> uncoveredArea = minesweeper.click(position);
+                    board.uncoverArea(uncoveredArea);
+                    System.out.println(board);
+                } catch (ExplosionException e) {
+                    Set<Point> minePositions = minesweeper.getAllMinePositions();
+                    board.uncoverMines(minePositions);
+                    System.out.println(board);
+                    System.out.println(e.getMessage());
+                    return;
+                } catch (NoMinesLeftToFindException e) {
+                    System.out.println(board);
+                    System.out.println(e.getMessage());
                 } catch (InvalidPositionException e) {
                     System.out.println(e.getMessage());
                 } catch (Exception e) {
@@ -64,3 +82,5 @@ public class ConsoleRunner {
     }
 
 }
+
+
